@@ -1,5 +1,6 @@
 import re
-from nodoAST import NodoFuncion, NodoParametro
+from nodoAST import *
+import json
 
 # === Analisis Lexico ===
 # Definir los patrones para los diferentes tipos de tokens
@@ -51,8 +52,10 @@ class Parser:
         
     # Comenzar analisis
     def parse(self):
+        funciones = []
         while self.obtener_token_actual() and (self.obtener_token_actual()[1] != "}"):
-            self.funcion()
+            funciones.append(self.funcion())
+        return funciones
     
     # Analizar la funcion en base a la estructura
     def funcion(self):
@@ -68,6 +71,8 @@ class Parser:
         
     def parametros(self):
         parametros = []
+        if self.obtener_token_actual()[1] == ')':
+            return parametros
         tipo = self.coincidir("DATATYPE")
         nombre = self.coincidir("IDENTIFIER")
         parametros.append(NodoParametro(tipo, nombre))
@@ -78,34 +83,39 @@ class Parser:
     
     def cuerpo(self):
         instrucciones = []
+        if self.obtener_token_actual() and self.obtener_token_actual()[1] == "}":
+            return instrucciones
         while self.obtener_token_actual() and self.obtener_token_actual()[1] != "return":
             instrucciones.append(self.statement())
-        self.coincidir('KEYWORD')
-        self.coincidir("IDENTIFIER")
+        instrucciones.append(self.retorno())
+        return instrucciones
 
     def retorno(self):
-        
+        self.coincidir('KEYWORD')
+        return NodoRetorno(self.expression())
 
     def statement(self):
         actual = self.obtener_token_actual()
+        nodo = None
         match actual[0]:
             case "DATATYPE":
-                self.declaration()
+                nodo = self.declaration()
                 self.coincidir("DELIMITER")
             case "IDENTIFIER":
-                self.assignment()
+                nodo = self.assignment()
                 self.coincidir("DELIMITER")
             case "KEYWORD":
                 match actual[1]:
                     case "if":
-                        self.if_else()
+                        nodo = self.if_else()
                     case "while":
-                        self.wh_loop()
+                        nodo = self.wh_loop()
                     case "for":
-                        self.f_loop()
+                        nodo = self.f_loop()
                     case "print":
-                        self.f_print()
+                        nodo = self.f_print()
                         self.coincidir("DELIMITER")
+        return nodo
 
     def if_else(self):
         self.coincidir("KEYWORD")
@@ -159,72 +169,119 @@ class Parser:
         self.coincidir("DELIMITER")
 
     def condition(self):
-        self.expression()
+        operando1 = self.expression()
+        operador = ("" "")
+        operando2 = ("" "")
         if self.obtener_token_actual():
             if self.obtener_token_actual()[0] == "RELATIONAL": 
-                self.coincidir("RELATIONAL")
-                self.expression()
+                operador = self.coincidir("RELATIONAL")
+                operando2 = self.expression()
             if self.obtener_token_actual()[0] == "LOGICAL":
-                self.coincidir("LOGICAL")
-                self.condition()
+                operador = self.coincidir("LOGICAL")
+                operando2 = self.condition()
+        return NodoCondicion(operando1, operador, operando2)
     
     def declaration(self):
         self.coincidir("DATATYPE")
-        self.coincidir("IDENTIFIER")
+        var = self.coincidir("IDENTIFIER")
         self.coincidir("ASSIGNMENT")
-        self.expression()
+        expresion = self.expression()
+        return NodoAsignacion(var, expresion)
         
     def assignment(self):
-        self.coincidir("IDENTIFIER")
+        var = self.coincidir("IDENTIFIER")
+        expresion = ("","")
         if self.obtener_token_actual() and self.obtener_token_actual()[0] == "ASSIGNMENT":
             self.coincidir("ASSIGNMENT")
-            self.expression()
+            expresion = self.expression()
         elif self.obtener_token_actual() and self.obtener_token_actual()[0] == "INCREMENT":
-            self.coincidir("INCREMENT")
+            expresion = self.coincidir("INCREMENT")
+        return NodoAsignacion(var, expresion)
 
     def expression(self):
         siguiente = self.obtener_token_actual()[0] 
         if self.obtener_token_actual and (self.obtener_token_actual()[0]== "IDENTIFIER" or self.obtener_token_actual()[0] == "NUMBER" or self.obtener_token_actual()[0] == "STRING"): 
-            self.coincidir(siguiente)
+            val = self.coincidir(siguiente)
             if siguiente == "IDENTIFIER" and self.obtener_token_actual() and self.obtener_token_actual()[0] == "INCREMENT":
-                self.coincidir("INCREMENT")
+                expresion = self.coincidir("INCREMENT")
+                return NodoExpresion(val, expresion)
             if self.obtener_token_actual() and self.obtener_token_actual()[0] == "ARITHMETIC":
-                self.coincidir("ARITHMETIC")
-                self.expression()   
+                operador = self.coincidir("ARITHMETIC")
+                expresion = self.expression()
+                return NodoOperacion(val, operador, expresion)   
     
-#text = """
-#int suma(int a, int b) {
-#    int c = a + b;
-#    a = 10 + 5 + b + c;
-#    if (a + 5 == 10){
-#        a;
-#    }
-#    return c;
-#}
-#"""
-
 text = """
+void main(){
+}
+
 int suma(int a, int b) {
-    if (a + 5 == 10 || a){
-        a = "Hello";
-    }
-    float b = 4.56;
-    while(45 ||  b <= 10 && a == 48){
-        int c = 5;
-    }
-    a = 5;
-    for (int i = 5; i <= 10; i--){
-        a++;
-        print(a);
-    print(5);
-    print("hello");
+    int c = a + b;
+    a = 10 + 5 + b + c;
+    if (a + 5 == 10){
+        a;
     }
     return c;
 }
 """
 
+#text = """
+#void main(){
+#    
+#}
+#
+#int suma(int a, int b) {
+#    if (a + 5 == 10 || a){
+#        a = "Hello";
+#    }
+#    float b = 4.56;
+#    while(45 ||  b <= 10 && a == 48){
+#        int c = 5;
+#    }
+#    a = 5;
+#    for (int i = 5; i <= 10; i--){
+#        a++;
+#        print(a);
+#    print(5);
+#    print("hello");
+#    }
+#    return c;
+#}
+#"""
+
+
+def printAst(node:NodoAST):
+    if isinstance(node, NodoPrograma):
+        return {'Programa':'Programa',
+                'Funciones':[printAst(f) for f in node.funciones]}
+    elif isinstance(node, NodoFuncion):
+        return {'Funcion':node.nombre[1],
+                'Parametros': [printAst(p) for p in node.parametros],
+                'Cuerpo': [printAst(c) for c in node.cuerpo]
+                }
+    elif isinstance(node, NodoParametro):
+        return {'Tipo':node.tipo[1],
+                'Nombre': node.nombre[1]}
+    elif isinstance(node, NodoAsignacion):
+        return {'Variable':node.nombre[1],
+                'Expresion':printAst(node.expresion)
+                }
+    elif isinstance(node, NodoAsignacion):
+        return {'Variable': node.nombre[1],
+                'Expresion':printAst(node.expresion)
+                }
+    elif isinstance(node, NodoOperacion):
+        return {'Operando1':node.operando1[1],
+                'Operador':node.operador[1],
+                'Operando2': printAst(node.operando2)}
+    elif isinstance(node, NodoExpresion):
+        return {'Valor': node.value[1],
+                'Expresion': printAst(node.expression)}
+    return {}
+
+
 tokens = indentificar_tokens(text)
 print(tokens)
 parser = Parser(tokens)
-parser.parse()
+root = NodoPrograma(parser.parse())
+print(json.dumps(printAst(root), indent = 1))
 print("Finalizacion sin errores")

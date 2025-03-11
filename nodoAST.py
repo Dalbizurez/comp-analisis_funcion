@@ -1,6 +1,12 @@
 class NodoAST:
     # Clase base para todos los nodos del AST
     pass
+
+class NodoPrograma(NodoAST):
+    def __init__(self, funciones):
+        super().__init__()
+        self.funciones = funciones
+
 class NodoFuncion(NodoAST):
     def __init__(self, nombre, parametros, cuerpo):
         super().__init__()
@@ -15,12 +21,18 @@ class NodoParametro(NodoAST):
         self.tipo = tipo
         self.nombre = nombre
 
-class NodoAsignaicion(NodoAST):
-    # Nodo que represnta una asignacion de variable
+class NodoAsignacion(NodoAST):
+    # Nodo que representa una asignacion de variable
     def __init__(self, nombre, expresion):
         super().__init__()
         self.nombre = nombre
         self.expresion = expresion
+
+class NodoExpresion(NodoAST):
+    def __init__(self, val, expresion):
+        super().__init__()
+        self.value = val
+        self.expression = expresion
 
 class NodoOperacion(NodoAST):
     # Nodo que representa una operacion artimetica
@@ -47,3 +59,17 @@ class NodoNumero(NodoAST):
     def __init__(self, valor):
         super().__init__()
         self.valor = valor
+
+class NodoCondicion(NodoAST):
+    # Nodo que representa una condicion
+    def __init__(self, operando1, operador, operando2):
+        super().__init__()
+        self.operando1 = operando1
+        self.operador = operador
+        self.operando2 = operando2
+
+class NodoIf(NodoAST):
+    # Nodo que representa un if
+    def __init__(self, condicion, bloque):
+        super().__init__()
+
