@@ -1,0 +1,51 @@
+{
+ "Programa": "Programa",
+ "Funciones": [
+  {
+   "Funcion": "main",
+   "Parametros": [],
+   "Cuerpo": []
+  },
+  {
+   "Funcion": "suma",
+   "Parametros": [
+    {
+     "Tipo": "int",
+     "Nombre": "a"
+    },
+    {
+     "Tipo": "int",
+     "Nombre": "b"
+    }
+   ],
+   "Cuerpo": [
+    {
+     "Variable": "c",
+     "Expresion": {
+      "Operando1": "a",
+      "Operador": "+",
+      "Operando2": {}
+     }
+    },
+    {
+     "Variable": "a",
+     "Expresion": {
+      "Operando1": "10",
+      "Operador": "+",
+      "Operando2": {
+       "Operando1": "5",
+       "Operador": "+",
+       "Operando2": {
+        "Operando1": "b",
+        "Operador": "+",
+        "Operando2": {}
+       }
+      }
+     }
+    },
+    {},
+    {}
+   ]
+  }
+ ]
+}
