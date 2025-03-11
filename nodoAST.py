@@ -60,6 +60,11 @@ class NodoNumero(NodoAST):
         super().__init__()
         self.valor = valor
 
+class NodoString(NodoAST):
+    def __init__(self, val):
+        super().__init__()
+        self.valor = val
+
 class NodoCondicion(NodoAST):
     # Nodo que representa una condicion
     def __init__(self, operando1, operador, operando2):

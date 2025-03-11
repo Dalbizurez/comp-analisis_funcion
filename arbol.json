@@ -22,23 +22,35 @@
     {
      "Variable": "c",
      "Expresion": {
-      "Operando1": "a",
+      "Operando1": {
+       "Id": "a"
+      },
       "Operador": "+",
-      "Operando2": {}
+      "Operando2": {
+       "Id": "b"
+      }
      }
     },
     {
      "Variable": "a",
      "Expresion": {
-      "Operando1": "10",
+      "Operando1": {
+       "Val": "10"
+      },
       "Operador": "+",
       "Operando2": {
-       "Operando1": "5",
+       "Operando1": {
+        "Val": "5"
+       },
        "Operador": "+",
        "Operando2": {
-        "Operando1": "b",
+        "Operando1": {
+         "Id": "b"
+        },
         "Operador": "+",
-        "Operando2": {}
+        "Operando2": {
+         "Id": "c"
+        }
        }
       }
      }

@@ -199,16 +199,25 @@ class Parser:
         return NodoAsignacion(var, expresion)
 
     def expression(self):
-        siguiente = self.obtener_token_actual()[0] 
-        if self.obtener_token_actual and (self.obtener_token_actual()[0]== "IDENTIFIER" or self.obtener_token_actual()[0] == "NUMBER" or self.obtener_token_actual()[0] == "STRING"): 
+        nodo = ("","")
+        siguiente = self.obtener_token_actual()[0]
+        if siguiente in ["IDENTIFIER", "NUMBER", "STRING"]:
             val = self.coincidir(siguiente)
+            match siguiente:
+                case "IDENTIFIER":
+                    nodo = NodoIdentificador(val)
+                case "NUMBER":
+                    nodo = NodoNumero(val)
+                case "STRING":
+                    nodo = NodoString(val)
             if siguiente == "IDENTIFIER" and self.obtener_token_actual() and self.obtener_token_actual()[0] == "INCREMENT":
                 expresion = self.coincidir("INCREMENT")
-                return NodoExpresion(val, expresion)
+                return NodoAsignacion(nodo, expresion)
             if self.obtener_token_actual() and self.obtener_token_actual()[0] == "ARITHMETIC":
                 operador = self.coincidir("ARITHMETIC")
                 expresion = self.expression()
-                return NodoOperacion(val, operador, expresion)   
+                return NodoOperacion(nodo, operador, expresion) 
+            return nodo  
     
 text = """
 void main(){
@@ -250,33 +259,40 @@ int suma(int a, int b) {
 
 
 def printAst(node:NodoAST):
+    obj = {}
     if isinstance(node, NodoPrograma):
-        return {'Programa':'Programa',
+        obj = {'Programa':'Programa',
                 'Funciones':[printAst(f) for f in node.funciones]}
     elif isinstance(node, NodoFuncion):
-        return {'Funcion':node.nombre[1],
+        obj = {'Funcion':node.nombre[1],
                 'Parametros': [printAst(p) for p in node.parametros],
                 'Cuerpo': [printAst(c) for c in node.cuerpo]
                 }
     elif isinstance(node, NodoParametro):
-        return {'Tipo':node.tipo[1],
+        obj = {'Tipo':node.tipo[1],
                 'Nombre': node.nombre[1]}
     elif isinstance(node, NodoAsignacion):
-        return {'Variable':node.nombre[1],
+        obj = {'Variable':node.nombre[1],
                 'Expresion':printAst(node.expresion)
                 }
     elif isinstance(node, NodoAsignacion):
-        return {'Variable': node.nombre[1],
+        obj = {'Variable': node.nombre[1],
                 'Expresion':printAst(node.expresion)
                 }
     elif isinstance(node, NodoOperacion):
-        return {'Operando1':node.operando1[1],
+        obj = {'Operando1':printAst(node.operando1),
                 'Operador':node.operador[1],
                 'Operando2': printAst(node.operando2)}
     elif isinstance(node, NodoExpresion):
-        return {'Valor': node.value[1],
+        obj = {'Valor': node.value[1],
                 'Expresion': printAst(node.expression)}
-    return {}
+    elif isinstance(node, NodoIdentificador):
+        obj = {'Id':node.nombre[1]}
+    elif isinstance(node, NodoNumero):
+        obj = {'Val':node.valor[1]}
+    elif isinstance(node, NodoString):
+        obj = {'Val': node.valor[1]}
+    return obj
 
 
 tokens = indentificar_tokens(text)
