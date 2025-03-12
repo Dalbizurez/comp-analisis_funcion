@@ -73,8 +73,37 @@ class NodoCondicion(NodoAST):
         self.operador = operador
         self.operando2 = operando2
 
+class NodoIncrement(NodoAST):
+    # Nodo que representa un incremento o decremento
+    def __init__(self, operador):
+        super().__init__()
+        self.operador = operador
+
+class NodoElse(NodoAST):
+    # Nodo que representa un bloque de un if_else
+    def __init__(self, bloque):
+        super().__init__()
+        self.bloque = bloque
+
+
 class NodoIf(NodoAST):
     # Nodo que representa un if
+    def __init__(self, condicion, bloque, elseNode = None):
+        super().__init__()
+        self.condicion = condicion
+        self.bloque = bloque
+        self.elseNode = elseNode
+
+class NodoWhile(NodoAST):
     def __init__(self, condicion, bloque):
         super().__init__()
+        self.condicion = condicion
+        self.bloque = bloque
 
+class NodoFor(NodoAST):
+    def __init__(self, expresionI, condicion, expresionF, bloque):
+        super().__init__()
+        self.var = expresionI
+        self.condicion = condicion
+        self.expresion = expresionF
+        self.bloque = bloque

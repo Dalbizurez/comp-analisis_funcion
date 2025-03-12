@@ -120,47 +120,54 @@ class Parser:
     def if_else(self):
         self.coincidir("KEYWORD")
         self.coincidir("DELIMITER")
-        self.condition()
+        condicion = self.condition()
         self.coincidir("DELIMITER")
         self.coincidir("DELIMITER")
-        self.block()
+        bloque = self.block()
         self.coincidir("DELIMITER")
+        nodoElse = None
         if self.obtener_token_actual() and self.obtener_token_actual()[1] == "else":
             self.coincidir("KEYWORD")
             self.coincidir("DELIMITER")
-            self.block()
+            bloqueElse = self.block()
+            nodoElse = NodoElse(bloqueElse)
             self.coincidir("DELIMITER")
+        return NodoIf(condicion, bloque, nodoElse)
 
     def  block(self):
+        instrucciones = []
         while self.obtener_token_actual() and self.obtener_token_actual()[0] != "DELIMITER":
             if self.obtener_token_actual()[1]=="return":
                 break
-            self.statement()
+            instrucciones.append(self.statement())
+        return instrucciones
 
     def wh_loop(self):
         self.coincidir("KEYWORD")
         self.coincidir("DELIMITER")
-        self.condition()
+        condicion = self.condition()
         self.coincidir("DELIMITER")
         self.coincidir("DELIMITER")
-        self.block()
+        bloque = self.block()
         self.coincidir("DELIMITER")
+        return NodoWhile(condicion, bloque)
 
     def f_loop(self):
         self.coincidir("KEYWORD")
         self.coincidir("DELIMITER")
         if self.obtener_token_actual() and self.obtener_token_actual()[0] == "IDENTIFIER":
-            self.assignment()
+            expresionI = self.assignment()
         else:
-            self.declaration()
+            expresionI = self.declaration()
         self.coincidir("DELIMITER")
-        self.condition()
+        condicion = self.condition()
         self.coincidir("DELIMITER")
-        self.expression()
+        expresionF = self.expression()
         self.coincidir("DELIMITER")
         self.coincidir("DELIMITER")
-        self.block()
+        bloque = self.block()
         self.coincidir("DELIMITER")
+        return NodoFor(expresionI, condicion, expresionF, bloque)
 
     def f_print(self):
         self.coincidir("KEYWORD")
@@ -170,8 +177,8 @@ class Parser:
 
     def condition(self):
         operando1 = self.expression()
-        operador = ("" "")
-        operando2 = ("" "")
+        operador = ("","")
+        operando2 = ("","")
         if self.obtener_token_actual():
             if self.obtener_token_actual()[0] == "RELATIONAL": 
                 operador = self.coincidir("RELATIONAL")
@@ -183,19 +190,19 @@ class Parser:
     
     def declaration(self):
         self.coincidir("DATATYPE")
-        var = self.coincidir("IDENTIFIER")
+        var = NodoIdentificador(self.coincidir("IDENTIFIER"))
         self.coincidir("ASSIGNMENT")
         expresion = self.expression()
         return NodoAsignacion(var, expresion)
         
     def assignment(self):
-        var = self.coincidir("IDENTIFIER")
+        var = NodoIdentificador(self.coincidir("IDENTIFIER"))
         expresion = ("","")
         if self.obtener_token_actual() and self.obtener_token_actual()[0] == "ASSIGNMENT":
             self.coincidir("ASSIGNMENT")
             expresion = self.expression()
         elif self.obtener_token_actual() and self.obtener_token_actual()[0] == "INCREMENT":
-            expresion = self.coincidir("INCREMENT")
+            expresion = NodoIncrement(self.coincidir("INCREMENT"))
         return NodoAsignacion(var, expresion)
 
     def expression(self):
@@ -211,7 +218,7 @@ class Parser:
                 case "STRING":
                     nodo = NodoString(val)
             if siguiente == "IDENTIFIER" and self.obtener_token_actual() and self.obtener_token_actual()[0] == "INCREMENT":
-                expresion = self.coincidir("INCREMENT")
+                expresion = NodoIncrement(self.coincidir("INCREMENT"))
                 return NodoAsignacion(nodo, expresion)
             if self.obtener_token_actual() and self.obtener_token_actual()[0] == "ARITHMETIC":
                 operador = self.coincidir("ARITHMETIC")
@@ -227,35 +234,40 @@ int suma(int a, int b) {
     int c = a + b;
     a = 10 + 5 + b + c;
     if (a + 5 == 10){
-        a;
+        a++;
+    } else {
+        b = 5 - 4;
+    }
+    while(45 ||  b <= 10 && a == 48){
+        int c = 5;
     }
     return c;
 }
 """
 
-#text = """
-#void main(){
-#    
-#}
-#
-#int suma(int a, int b) {
-#    if (a + 5 == 10 || a){
-#        a = "Hello";
-#    }
-#    float b = 4.56;
-#    while(45 ||  b <= 10 && a == 48){
-#        int c = 5;
-#    }
-#    a = 5;
-#    for (int i = 5; i <= 10; i--){
-#        a++;
-#        print(a);
-#    print(5);
-#    print("hello");
-#    }
-#    return c;
-#}
-#"""
+text = """
+void main(){
+    
+}
+
+int suma(int a, int b) {
+    if (a + 5 == 10 || a){
+        a = "Hello";
+    }
+    float b = 4.56;
+    while(45 ||  b <= 10 && a == 48){
+        int c = 5;
+    }
+    a = 5;
+    for (int i = 5; i <= 10; i--){
+        a++;
+        print(a);
+    print(5);
+    print("hello");
+    }
+    return c;
+}
+"""
 
 
 def printAst(node:NodoAST):
@@ -272,12 +284,12 @@ def printAst(node:NodoAST):
         obj = {'Tipo':node.tipo[1],
                 'Nombre': node.nombre[1]}
     elif isinstance(node, NodoAsignacion):
-        obj = {'Variable':node.nombre[1],
-                'Expresion':printAst(node.expresion)
+        obj = {'Variable':{'id':printAst(node.nombre),
+                'Expresion':printAst(node.expresion)}
                 }
     elif isinstance(node, NodoAsignacion):
-        obj = {'Variable': node.nombre[1],
-                'Expresion':printAst(node.expresion)
+        obj = {'Variable':{'id':node.nombre[1],
+                'Expresion':printAst(node.expresion)}
                 }
     elif isinstance(node, NodoOperacion):
         obj = {'Operando1':printAst(node.operando1),
@@ -286,6 +298,30 @@ def printAst(node:NodoAST):
     elif isinstance(node, NodoExpresion):
         obj = {'Valor': node.value[1],
                 'Expresion': printAst(node.expression)}
+    elif isinstance(node,NodoCondicion):
+        obj = {'Operando1':printAst(node.operando1),
+                'Operador':node.operador[1],
+                'Operando2': printAst(node.operando2)}
+    elif isinstance(node, NodoIncrement):
+        obj = {'Operador': node.operador[1]}
+    elif isinstance(node, NodoIf):
+        obj = {'if':{'Condicion':printAst(node.condicion),
+               'CuerpoIf': [printAst(b) for b in node.bloque],
+               'Else': printAst(node.elseNode)}}
+    elif isinstance(node, NodoElse):
+        obj = {'CuerpoElse': [printAst(b) for b in node.bloque]}
+    elif isinstance(node, NodoWhile):
+        obj = {'while': {'Condicion':printAst(node.condicion),
+                         'CuerpoWhile': [printAst(b) for b in node.bloque]
+                         }}
+    elif isinstance(node, NodoFor):
+        obj = {'for':{'Variable':printAst(node.var),
+                      'Condicion':printAst(node.condicion),
+                      'Expresion':printAst(node.expresion),
+                      'CuerpoFor':[printAst(b) for b in node.bloque]}
+               }
+    elif isinstance(node, NodoRetorno):
+        obj = {'return':printAst(node.expresion)}
     elif isinstance(node, NodoIdentificador):
         obj = {'Id':node.nombre[1]}
     elif isinstance(node, NodoNumero):
