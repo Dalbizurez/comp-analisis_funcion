@@ -49,12 +49,12 @@ class NodoOperacion(NodoAST):
         codigo = []
 
         codigo.append(self.operando1.assembly())
-        codigo.append("push ax")
+        codigo.append("PUSH ax")
         codigo.append(self.operando2.assembly())
-        codigo.append("push ax")
+        codigo.append("PUSH ax")
         
-        codigo.append("push bx")
-        codigo.append("push ax")
+        codigo.append("POP bx")
+        codigo.append("POP ax")
 
         match self.operador[1]:
             case '+':
@@ -83,7 +83,7 @@ class NodoIdentificador(NodoAST):
         self.nombre = nombre
 
     def assembly(self):
-        return f"mov ax, [{self.nombre[1]}]"
+        return f"MOV ax, [{self.nombre[1]}]"
 
 class NodoNumero(NodoAST):
     # Nodo que representa un numero
@@ -91,7 +91,7 @@ class NodoNumero(NodoAST):
         super().__init__()
         self.valor = valor
     def assembly(self):
-        return f"mov ax, {self.nombre[1]}"
+        return f"MOV ax, {self.nombre[1]}"
 
 class NodoString(NodoAST):
     def __init__(self, val):
@@ -99,7 +99,7 @@ class NodoString(NodoAST):
         self.valor = val
 
     def assembly(self):
-        return f"  mov ax, {self.valor[1]}"
+        return f"MOV ax, {self.valor[1]}"
 
 class NodoCondicion(NodoAST):
     # Nodo que representa una condicion
@@ -111,10 +111,25 @@ class NodoCondicion(NodoAST):
 
     def assembly(self):
         codigo = []
-        op1 = (self.operando1.assembly())
+        op1 = self.operando1.assembly()
+        op2 = self.operando2.assembly()
+        codigo.append(f"POP bx")
+        codigo.append(f"POP ax")
         match self.operador[0]:
             case "RELATIONAL":
-                case 
+                op = "CMP ax, bx"
+            case "LOGICAL":
+                match self.operador[1]:
+                    case "&&":
+                        op = "AND ax, bx"
+                    case "||":
+                        op = "OR ax, bx"
+                    case "!":
+                        op = "NOT ax"
+        codigo.append(op)
+
+        return "\n".join(codigo)        
+                
         
 
 class NodoIncrement(NodoAST):
