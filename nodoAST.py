@@ -91,7 +91,7 @@ class NodoNumero(NodoAST):
         super().__init__()
         self.valor = valor
     def assembly(self):
-        return f"MOV ax, {self.nombre[1]}"
+        return f"MOV ax, {self.valor[1]}"
 
 class NodoString(NodoAST):
     def __init__(self, val):
@@ -111,8 +111,8 @@ class NodoCondicion(NodoAST):
 
     def assembly(self):
         codigo = []
-        op1 = self.operando1.assembly()
-        op2 = self.operando2.assembly()
+        codigo.append(self.operando1.assembly())
+        codigo.append(self.operando2.assembly())
         codigo.append(f"POP bx")
         codigo.append(f"POP ax")
         match self.operador[0]:
@@ -155,6 +155,10 @@ class NodoIf(NodoAST):
     
     def assembly(self):
         codigo = []
+        codigo.append(self.condicion.assembly())
+
+
+        return "\n".join(codigo)
 
 
 class NodoWhile(NodoAST):
