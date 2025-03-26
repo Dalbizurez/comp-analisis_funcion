@@ -20,34 +20,64 @@
    ],
    "Cuerpo": [
     {
+     "Variable": {
+      "id": {
+       "Id": "a"
+      },
+      "Expresion": {
+       "Operando1": {
+        "Val": "5"
+       },
+       "Operador": "+",
+       "Operando2": {
+        "Id": "b"
+       }
+      }
+     }
+    },
+    {
      "if": {
       "Condicion": {
-       "Operando1": {
-        "Operando1": {
-         "Id": "a"
+       "Expresion1": {
+        "Expresion1": {
+         "Operando1": {
+          "Id": "a"
+         },
+         "Operador": "+",
+         "Operando2": {
+          "Id": "b"
+         }
         },
-        "Operador": "+",
-        "Operando2": {
+        "Comparador": "==",
+        "Expresion2": {
          "Val": "5"
         }
        },
-       "Operador": "||",
-       "Operando2": {
-        "Operando1": {
-         "Id": "a"
+       "Operador": "&&",
+       "Expresion2": {
+        "Expresion1": {
+         "Id": "b"
         },
-        "Operador": "",
-        "Operando2": {}
+        "Operador": "==",
+        "Expresion2": {
+         "Val": "2"
+        }
        }
       },
       "CuerpoIf": [
        {
         "Variable": {
          "id": {
-          "Id": "a"
+          "Id": "c"
          },
          "Expresion": {
-          "Val": "\"Hello\""
+          "Operando1": {
+           "Id": "b"
+          },
+          "Operador": "+",
+          "Operando2": {
+           "Val": "10"
+          }
          }
         }
        }
@@ -56,113 +86,8 @@
      }
     },
     {
-     "Variable": {
-      "id": {
-       "Id": "b"
-      },
-      "Expresion": {
-       "Val": "4.56"
-      }
-     }
-    },
-    {
-     "while": {
-      "Condicion": {
-       "Operando1": {
-        "Val": "45"
-       },
-       "Operador": "||",
-       "Operando2": {
-        "Operando1": {
-         "Id": "b"
-        },
-        "Operador": "&&",
-        "Operando2": {
-         "Operando1": {
-          "Id": "a"
-         },
-         "Operador": "==",
-         "Operando2": {
-          "Val": "48"
-         }
-        }
-       }
-      },
-      "CuerpoWhile": [
-       {
-        "Variable": {
-         "id": {
-          "Id": "c"
-         },
-         "Expresion": {
-          "Val": "5"
-         }
-        }
-       }
-      ]
-     }
-    },
-    {
-     "Variable": {
-      "id": {
-       "Id": "a"
-      },
-      "Expresion": {
-       "Val": "5"
-      }
-     }
-    },
-    {
-     "for": {
-      "Variable": {
-       "Variable": {
-        "id": {
-         "Id": "i"
-        },
-        "Expresion": {
-         "Val": "5"
-        }
-       }
-      },
-      "Condicion": {
-       "Operando1": {
-        "Id": "i"
-       },
-       "Operador": "<=",
-       "Operando2": {
-        "Val": "10"
-       }
-      },
-      "Expresion": {
-       "Variable": {
-        "id": {
-         "Id": "i"
-        },
-        "Expresion": {
-         "Operador": "--"
-        }
-       }
-      },
-      "CuerpoFor": [
-       {
-        "Variable": {
-         "id": {
-          "Id": "a"
-         },
-         "Expresion": {
-          "Operador": "++"
-         }
-        }
-       },
-       {},
-       {},
-       {}
-      ]
-     }
-    },
-    {
      "return": {
-      "Id": "c"
+      "Id": "a"
      }
     }
    ]

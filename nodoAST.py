@@ -6,6 +6,9 @@ class NodoPrograma(NodoAST):
     def __init__(self, funciones):
         super().__init__()
         self.funciones = funciones
+    
+    def assembly(self):
+        return self.funciones.assembly()
 
 class NodoFuncion(NodoAST):
     def __init__(self, nombre, parametros, cuerpo):
@@ -13,6 +16,9 @@ class NodoFuncion(NodoAST):
         self.nombre = nombre
         self.parametros = parametros
         self.cuerpo = cuerpo
+
+    def assembly():
+        pass
 
 class NodoParametro(NodoAST):
     # Nodo que representa un parametro de funcion
@@ -28,6 +34,14 @@ class NodoAsignacion(NodoAST):
         self.nombre = nombre
         self.expresion = expresion
 
+    def assembly(self):
+        codigo = []
+        codigo.append(self.expresion.assembly())
+        codigo.append(self.nombre.assembly())
+        codigo.append("POP bx ; Sacamos el resultado de la expresion anterior para guardar en la variable")
+        codigo.append("MOV ax, bx")
+        return "\n".join(codigo)
+
 class NodoExpresion(NodoAST):
     def __init__(self, val, expresion):
         super().__init__()
@@ -35,7 +49,7 @@ class NodoExpresion(NodoAST):
         self.expression = expresion
 
     def assembly(self):
-        pass
+        return self.expression.assembly()
 
 class NodoOperacion(NodoAST):
     # Nodo que representa una operacion artimetica
@@ -47,6 +61,7 @@ class NodoOperacion(NodoAST):
 
     def assembly(self):
         codigo = []
+        codigo.append("; Codigo de operacion aritmetica")
 
         codigo.append(self.operando1.assembly())
         codigo.append("PUSH ax")
@@ -55,7 +70,7 @@ class NodoOperacion(NodoAST):
         
         codigo.append("POP bx")
         codigo.append("POP ax")
-
+        codigo.append("; Operacion")
         match self.operador[1]:
             case '+':
                 op = "ADD ax, bx"
@@ -66,7 +81,7 @@ class NodoOperacion(NodoAST):
             case '/':
                 op = "DIV bx"
         codigo.append(op)
-
+        codigo.append("PUSH ax ; Almacenar resultado")
         return "\n".join(codigo)
 
 
@@ -111,13 +126,13 @@ class NodoCondicion(NodoAST):
 
     def assembly(self):
         codigo = []
+        codigo.append("; Codigo de condicion en un if")
         codigo.append(self.operando1.assembly())
         codigo.append(self.operando2.assembly())
+        codigo.append("PUSH ax")
         codigo.append(f"POP bx")
         codigo.append(f"POP ax")
         match self.operador[0]:
-            case "RELATIONAL":
-                op = "CMP ax, bx"
             case "LOGICAL":
                 match self.operador[1]:
                     case "&&":
@@ -126,10 +141,32 @@ class NodoCondicion(NodoAST):
                         op = "OR ax, bx"
                     case "!":
                         op = "NOT ax"
-        codigo.append(op)
+                codigo.append(op)
+        codigo.append("PUSH ax")
 
         return "\n".join(codigo)        
-                
+
+class NodoRelacional(NodoAST):
+    def __init__(self, operando1, operador, operando2):
+        super().__init__()
+        self.operando1 = operando1
+        self.operador = operador
+        self.operando2 = operando2
+
+    def assembly(self):
+        codigo = []
+        codigo.append("; Codigo de comparacion relacional")
+        codigo.append(self.operando1.assembly())
+        codigo.append("PUSH ax")
+        codigo.append(self.operando2.assembly())
+        codigo.append("PUSH ax")
+        codigo.append(f"POP bx")
+        codigo.append(f"POP ax")
+        codigo.append(f"CMP ax, bx")
+        codigo.append("; Fin relacional")
+        return "\n".join(codigo)
+
+
         
 
 class NodoIncrement(NodoAST):
@@ -143,6 +180,9 @@ class NodoElse(NodoAST):
     def __init__(self, bloque):
         super().__init__()
         self.bloque = bloque
+    
+    def assembly(self):
+        return self.bloque.assembly()
 
 
 class NodoIf(NodoAST):
@@ -157,6 +197,15 @@ class NodoIf(NodoAST):
         codigo = []
         codigo.append(self.condicion.assembly())
 
+        ifLabel = f"{id(self)}_if:"
+        elseLabel = ""
+        codigo.append(ifLabel)
+        if self.bloque:
+            codigo.append("\n".join([s.assembly() for s in self.bloque]))
+        if self.elseNode:
+            elseLabel = f"{id(self)}_else:"
+            codigo.append(elseLabel)   
+            codigo.append(NodoElse(self.elseNode).assembly())
 
         return "\n".join(codigo)
 

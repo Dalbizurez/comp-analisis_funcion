@@ -184,6 +184,8 @@ class Parser:
                 operador = self.coincidir("RELATIONAL")
                 operando2 = self.expression()
             if self.obtener_token_actual()[0] == "LOGICAL":
+                if self.obtener_token_actual()[1] != "!":
+                    operando1 = NodoRelacional(operando1, operador, operando2)
                 operador = self.coincidir("LOGICAL")
                 operando2 = self.condition()
         return NodoCondicion(operando1, operador, operando2)
@@ -268,7 +270,19 @@ int suma(int a, int b) {
     return c;
 }
 """
+text = """
+void main(){
+    
+}
 
+int suma(int a, int b) {
+    a = 5 + b;
+    if (a + b == 5 && b == 2){
+        c = b + 10;
+    } 
+    return a;  
+}
+"""
 
 def printAst(node:NodoAST):
     obj = {}
@@ -299,15 +313,20 @@ def printAst(node:NodoAST):
         obj = {'Valor': node.value[1],
                 'Expresion': printAst(node.expression)}
     elif isinstance(node,NodoCondicion):
-        obj = {'Operando1':printAst(node.operando1),
+        obj = {'Expresion1':printAst(node.operando1),
                 'Operador':node.operador[1],
-                'Operando2': printAst(node.operando2)}
+                'Expresion2': printAst(node.operando2)}
+    elif isinstance(node, NodoRelacional):
+        obj = {'Expresion1':printAst(node.operando1),
+                'Comparador':node.operador[1],
+                'Expresion2': printAst(node.operando2)}
     elif isinstance(node, NodoIncrement):
         obj = {'Operador': node.operador[1]}
     elif isinstance(node, NodoIf):
         obj = {'if':{'Condicion':printAst(node.condicion),
                'CuerpoIf': [printAst(b) for b in node.bloque],
                'Else': printAst(node.elseNode)}}
+        print(node.assembly())
     elif isinstance(node, NodoElse):
         obj = {'CuerpoElse': [printAst(b) for b in node.bloque]}
     elif isinstance(node, NodoWhile):
