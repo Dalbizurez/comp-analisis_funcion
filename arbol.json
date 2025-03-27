@@ -36,53 +36,38 @@
      }
     },
     {
-     "if": {
-      "Condicion": {
-       "Expresion1": {
-        "Expresion1": {
-         "Operando1": {
-          "Id": "a"
-         },
-         "Operador": "+",
-         "Operando2": {
-          "Id": "b"
-         }
+     "for": {
+      "Variable": {
+       "Variable": {
+        "id": {
+         "Id": "i"
         },
-        "Comparador": "==",
-        "Expresion2": {
+        "Expresion": {
          "Val": "5"
-        }
-       },
-       "Operador": "&&",
-       "Expresion2": {
-        "Expresion1": {
-         "Id": "b"
-        },
-        "Operador": "==",
-        "Expresion2": {
-         "Val": "2"
         }
        }
       },
-      "CuerpoIf": [
+      "Condicion": {
+       "Expresion1": {
+        "Id": "i"
+       },
+       "Comparador": "<=",
+       "Expresion2": {
+        "Val": "10"
+       }
+      },
+      "Expresion": {
+       "id: <nodoAST.NodoIdentificador object at 0x0000025ADBD11110>": {
+        "Operador": "++"
+       }
+      },
+      "CuerpoFor": [
        {
-        "Variable": {
-         "id": {
-          "Id": "c"
-         },
-         "Expresion": {
-          "Operando1": {
-           "Id": "b"
-          },
-          "Operador": "+",
-          "Operando2": {
-           "Val": "10"
-          }
-         }
+        "id: <nodoAST.NodoIdentificador object at 0x0000025ADBD10B90>": {
+         "Operador": "++"
         }
        }
-      ],
-      "Else": {}
+      ]
      }
     },
     {
